@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUKUND AGRO SEEDS - Pesticide Shop Billing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .view { display: none; }
+        .view.active { display: block; }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="loading-spinner" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Side Navigation -->
+        <nav class="w-16 md:w-64 bg-white shadow-lg flex flex-col">
+            <div class="flex items-center justify-center md:justify-start p-4 md:p-6 border-b">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" clipRule="evenodd" />
+                  <path d="M10 4a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 4zM10 12a1 1 0 100 2 1 1 0 000-2z" />
+                </svg>
+                <h1 class="hidden md:block ml-3 text-2xl font-bold text-gray-800">MUKUND AGRO SEEDS</h1>
+            </div>
+            <ul id="nav-menu" class="flex-1 mt-4">
+                <li data-view="dashboard" class="px-4 md:px-6 my-2"><button class="nav-button w-full flex items-center p-3 rounded-lg transition-colors bg-green-600 text-white shadow-md"><i data-lucide="layout-dashboard"></i><span class="hidden md:block ml-4 font-medium">Dashboard</span></button></li>
+                <li data-view="newBill" class="px-4 md:px-6 my-2"><button class="nav-button w-full flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"><i data-lucide="plus-circle"></i><span class="hidden md:block ml-4 font-medium">New Bill</span></button></li>
+                <li data-view="bills" class="px-4 md:px-6 my-2"><button class="nav-button w-full flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"><i data-lucide="file-text"></i><span class="hidden md:block ml-4 font-medium">Bill History</span></button></li>
+                <li data-view="products" class="px-4 md:px-6 my-2"><button class="nav-button w-full flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"><i data-lucide="shopping-bag"></i><span class="hidden md:block ml-4 font-medium">Products</span></button></li>
+                <li data-view="customers" class="px-4 md:px-6 my-2"><button class="nav-button w-full flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"><i data-lucide="users"></i><span class="hidden md:block ml-4 font-medium">Customers</span></button></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
+                <div id="dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Stats will be rendered here -->
+                </div>
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                     <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Quick Actions</h3>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button data-view="newBill" class="nav-button px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-700 shadow-sm hover:shadow-md w-full"><i data-lucide="plus-circle" class="h-5 w-5"></i> New Bill</button>
+                            <button data-view="products" class="nav-button px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-transparent border border-green-600 text-green-600 hover:bg-green-600 hover:text-white w-full"><i data-lucide="shopping-bag" class="h-5 w-5"></i> Manage Products</button>
+                            <button data-view="customers" class="nav-button px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-transparent border border-green-600 text-green-600 hover:bg-green-600 hover:text-white w-full"><i data-lucide="user-plus" class="h-5 w-5"></i> Add Customer</button>
+                        </div>
+                    </div>
+                     <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-700">Welcome!</h3>
+                        <p class="text-gray-600">
+                            Welcome to MUKUND AGRO SEEDS, your simple solution for pesticide shop billing. 
+                            Use the menu on the left to navigate. You can create a new bill, manage your product inventory, and keep track of your customers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products View -->
+            <div id="products-view" class="view">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manage Products</h2>
+                    <button id="add-product-btn" class="px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 bg-green-600 text-white hover:bg-green-700 shadow-sm">
+                        <i data-lucide="plus-circle" class="h-5 w-5"></i> Add Product
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b bg-gray-50">
+                                    <th class="p-3 font-semibold text-gray-600">Name</th><th class="p-3 font-semibold text-gray-600">HSN</th><th class="p-3 font-semibold text-gray-600">Rate (₹)</th><th class="p-3 font-semibold text-gray-600">GST (%)</th><th class="p-3 font-semibold text-gray-600">Stock</th><th class="p-3 font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers View -->
+            <div id="customers-view" class="view">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manage Customers</h2>
+                    <button id="add-customer-btn" class="px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 bg-green-600 text-white hover:bg-green-700 shadow-sm">
+                        <i data-lucide="user-plus" class="h-5 w-5"></i> Add Customer
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                     <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b bg-gray-50"><th class="p-3 font-semibold text-gray-600">Name</th><th class="p-3 font-semibold text-gray-600">Phone</th><th class="p-3 font-semibold text-gray-600">Address</th><th class="p-3 font-semibold text-gray-600">Actions</th></tr>
+                            </thead>
+                            <tbody id="customers-table-body"></tbody>
+                        </table>
+                     </div>
+                </div>
+            </div>
+
+            <!-- New Bill View -->
+            <div id="newBill-view" class="view">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">New Bill</h2>
+                    <div class="flex gap-2">
+                         <button id="print-bill-btn" class="px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 bg-gray-200 text-gray-800 hover:bg-gray-300"><i data-lucide="printer" class="h-5 w-5"></i> Print</button>
+                         <button id="save-bill-btn" class="px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 bg-green-600 text-white hover:bg-green-700"><i data-lucide="plus-circle" class="h-5 w-5"></i> Save Bill</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 pb-6 border-b">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+                            <div id="selected-customer-display" class="hidden items-center justify-between p-2 bg-gray-100 rounded-md"></div>
+                            <div id="customer-search-container">
+                                 <div class="flex items-center border border-gray-300 rounded-md">
+                                    <i data-lucide="search" class="text-gray-400 mx-2 h-5 w-5"></i>
+                                    <input type="text" id="customer-search" placeholder="Search customer..." class="w-full py-2 pr-2 outline-none"/>
+                                    <button id="add-customer-quick-btn" class="p-2 bg-green-500 text-white rounded-r-md hover:bg-green-600"><i data-lucide="user-plus" class="h-5 w-5"></i></button>
+                                </div>
+                                <ul id="customer-search-results" class="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg"></ul>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bill No.</label>
+                            <input id="bill-no" type="text" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bill Date</label>
+                            <input id="bill-date" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md"/>
+                        </div>
+                    </div>
+                    <div class="mb-6 relative">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Add Product</label>
+                         <div class="flex items-center border border-gray-300 rounded-md">
+                            <i data-lucide="search" class="text-gray-400 mx-2 h-5 w-5"></i>
+                            <input type="text" id="product-search" placeholder="Search products by name..." class="w-full p-2 outline-none"/>
+                         </div>
+                         <ul id="product-search-results" class="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg"></ul>
+                    </div>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-left">
+                            <thead class="border-b bg-gray-50">
+                                <tr><th class="p-3 font-semibold text-gray-600 w-1/2">Product</th><th class="p-3 font-semibold text-gray-600">Qty</th><th class="p-3 font-semibold text-gray-600">Rate (₹)</th><th class="p-3 font-semibold text-gray-600">Amount (₹)</th><th class="p-3 font-semibold text-gray-600"></th></tr>
+                            </thead>
+                            <tbody id="bill-items-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-end">
+                        <div class="w-full md:w-1/3 space-y-2">
+                            <div class="flex justify-between"><span class="font-semibold text-gray-600">Subtotal:</span><span id="subtotal">₹0.00</span></div>
+                            <div class="flex justify-between"><span class="font-semibold text-gray-600">Total GST:</span><span id="total-gst">₹0.00</span></div>
+                            <div class="flex justify-between text-xl font-bold pt-2 border-t"><span class="text-gray-800">Grand Total:</span><span id="grand-total" class="text-green-600">₹0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill History View -->
+            <div id="bills-view" class="view">
+                 <div class="flex justify-between items-center mb-6"><h2 class="text-3xl font-bold text-gray-800">Bill History</h2></div>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-2">Recent Bills</h3>
+                        <ul id="bill-history-list" class="space-y-2 max-h-96 overflow-y-auto"></ul>
+                    </div>
+                    <div id="bill-details-container" class="md:col-span-2 bg-white rounded-lg shadow-md p-6 flex items-center justify-center h-full">
+                        <p class="text-gray-500">Select a bill to view details</p>
+                    </div>
+                 </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Universal Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-semibold text-gray-800"></h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800"><i data-lucide="x" class="h-6 w-6"></i></button>
+            </div>
+            <div id="modal-body" class="p-6"></div>
+        </div>
+    </div>
+    
+    <!-- Hidden Printable Area -->
+    <div id="print-area" class="hidden"></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, getDocs, setDoc, deleteDoc, onSnapshot, query, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pesticide-billing-app-html';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let products = [], customers = [], bills = [];
+        let currentBillItems = [];
+        let selectedCustomer = null;
+
+        // --- DOM Elements ---
+        const views = document.querySelectorAll('.view');
+        const navMenu = document.getElementById('nav-menu');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        const showView = (viewId) => {
+            views.forEach(view => view.classList.remove('active'));
+            document.getElementById(`${viewId}-view`).classList.add('active');
+            
+            navMenu.querySelectorAll('button').forEach(btn => {
+                const li = btn.parentElement;
+                if (li.dataset.view === viewId) {
+                    btn.classList.add('bg-green-600', 'text-white', 'shadow-md');
+                    btn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                } else {
+                    btn.classList.remove('bg-green-600', 'text-white', 'shadow-md');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+                }
+            });
+
+            // Refresh data for specific views
+            if (viewId === 'dashboard') renderDashboard();
+            if (viewId === 'newBill') resetNewBill();
+        };
+
+        // --- Modal Logic ---
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        
+        const openModal = (title, content) => {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = '';
+            modalBody.appendChild(content);
+            modal.classList.remove('hidden');
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+        
+        // --- Firestore Data Functions ---
+        const setupFirestoreListeners = () => {
+            onSnapshot(collection(db, `artifacts/${appId}/public/data/products`), snapshot => {
+                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProductsTable();
+                renderDashboard();
+            });
+            onSnapshot(collection(db, `artifacts/${appId}/public/data/customers`), snapshot => {
+                customers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCustomersTable();
+                 renderDashboard();
+            });
+            onSnapshot(collection(db, `artifacts/${appId}/public/data/bills`), snapshot => {
+                bills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                bills.sort((a, b) => (b.billNo || '').localeCompare(a.billNo || ''));
+                renderBillHistoryList();
+                 renderDashboard();
+            });
+        };
+
+        // --- Render Functions ---
+        
+        const renderDashboard = () => {
+            const totalSales = bills.reduce((sum, bill) => sum + (bill.grandTotal || 0), 0);
+            const statsContainer = document.getElementById('dashboard-stats');
+            statsContainer.innerHTML = `
+                <div class="rounded-lg p-6 text-white shadow-lg bg-blue-500">...</div>
+                <div class="rounded-lg p-6 text-white shadow-lg bg-yellow-500">...</div>
+                <div class="rounded-lg p-6 text-white shadow-lg bg-purple-500">...</div>
+                <div class="rounded-lg p-6 text-white shadow-lg bg-green-500">...</div>
+            `; // Placeholder for faster rendering, then update.
+            statsContainer.children[0].innerHTML = `<div class="flex items-center justify-between"><div><p class="text-lg font-semibold">Total Products</p><p class="text-3xl font-bold">${products.length}</p></div><div class="bg-white bg-opacity-20 p-3 rounded-full"><i data-lucide="shopping-bag"></i></div></div>`;
+            statsContainer.children[1].innerHTML = `<div class="flex items-center justify-between"><div><p class="text-lg font-semibold">Total Customers</p><p class="text-3xl font-bold">${customers.length}</p></div><div class="bg-white bg-opacity-20 p-3 rounded-full"><i data-lucide="users"></i></div></div>`;
+            statsContainer.children[2].innerHTML = `<div class="flex items-center justify-between"><div><p class="text-lg font-semibold">Total Bills</p><p class="text-3xl font-bold">${bills.length}</p></div><div class="bg-white bg-opacity-20 p-3 rounded-full"><i data-lucide="file-text"></i></div></div>`;
+            statsContainer.children[3].innerHTML = `<div class="flex items-center justify-between"><div><p class="text-lg font-semibold">Total Sales</p><p class="text-3xl font-bold">₹${totalSales.toFixed(2)}</p></div><div class="bg-white bg-opacity-20 p-3 rounded-full"><span class="text-2xl font-bold">₹</span></div></div>`;
+            lucide.createIcons();
+        };
+
+        const renderProductsTable = () => {
+            const tbody = document.getElementById('products-table-body');
+            tbody.innerHTML = products.map(p => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${p.name}</td><td class="p-3">${p.hsn}</td><td class="p-3">${p.rate.toFixed(2)}</td><td class="p-3">${p.gst}</td><td class="p-3">${p.stock} ${p.unit}</td>
+                    <td class="p-3 flex gap-2">
+                        <button class="edit-product-btn text-blue-600 hover:text-blue-800" data-id="${p.id}"><i data-lucide="edit" class="h-5 w-5"></i></button>
+                        <button class="delete-product-btn text-red-600 hover:text-red-800" data-id="${p.id}"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        const renderCustomersTable = () => {
+             const tbody = document.getElementById('customers-table-body');
+            tbody.innerHTML = customers.map(c => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${c.name}</td><td class="p-3">${c.phone}</td><td class="p-3">${c.address}</td>
+                    <td class="p-3 flex gap-2">
+                        <button class="edit-customer-btn text-blue-600 hover:text-blue-800" data-id="${c.id}"><i data-lucide="edit" class="h-5 w-5"></i></button>
+                        <button class="delete-customer-btn text-red-600 hover:text-red-800" data-id="${c.id}"><i data-lucide="trash-2" class="h-5 w-5"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        const renderBillHistoryList = () => {
+            document.getElementById('bill-history-list').innerHTML = bills.map(b => `
+                <li data-id="${b.id}" class="bill-history-item p-2 rounded-md cursor-pointer hover:bg-gray-100">
+                    <div class="flex justify-between font-semibold"><span>Bill #${b.billNo}</span><span>₹${b.grandTotal.toFixed(2)}</span></div>
+                    <div class="text-sm text-gray-500">${b.customer.name} - ${new Date(b.billDate).toLocaleDateString()}</div>
+                </li>
+            `).join('');
+        };
+        
+        // --- Product CRUD ---
+        const openProductModal = (product = null) => {
+            const isEdit = product !== null;
+            const content = document.createElement('div');
+            content.className = 'space-y-4';
+            content.innerHTML = `
+                <input id="product-name" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Product Name" value="${isEdit ? product.name : ''}">
+                <input id="product-hsn" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="HSN Code" value="${isEdit ? product.hsn : ''}">
+                <input id="product-rate" type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Rate" value="${isEdit ? product.rate : ''}">
+                <input id="product-gst" type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="GST %" value="${isEdit ? product.gst : ''}">
+                <div class="flex gap-4">
+                    <input id="product-stock" type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Stock" value="${isEdit ? product.stock : ''}">
+                    <select id="product-unit" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="ltr" ${isEdit && product.unit === 'ltr' ? 'selected' : ''}>Litre (Ltr)</option>
+                        <option value="kg" ${isEdit && product.unit === 'kg' ? 'selected' : ''}>Kilogram (Kg)</option>
+                        <option value="pcs" ${isEdit && product.unit === 'pcs' ? 'selected' : ''}>Pieces (Pcs)</option>
+                        <option value="pkt" ${isEdit && product.unit === 'pkt' ? 'selected' : ''}>Packet (Pkt)</option>
+                    </select>
+                </div>
+                <button id="save-product-form-btn" class="w-full px-4 py-2 rounded-md font-semibold text-sm bg-green-600 text-white hover:bg-green-700">${isEdit ? 'Update' : 'Save'}</button>
+            `;
+            
+            content.querySelector('#save-product-form-btn').onclick = async () => {
+                const productData = {
+                    name: document.getElementById('product-name').value,
+                    hsn: document.getElementById('product-hsn').value,
+                    rate: parseFloat(document.getElementById('product-rate').value) || 0,
+                    gst: parseFloat(document.getElementById('product-gst').value) || 0,
+                    stock: parseInt(document.getElementById('product-stock').value, 10) || 0,
+                    unit: document.getElementById('product-unit').value,
+                };
+
+                if (isEdit) {
+                    await setDoc(doc(db, `artifacts/${appId}/public/data/products`, product.id), productData, { merge: true });
+                } else {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/products`), productData);
+                }
+                closeModal();
+            };
+            openModal(isEdit ? 'Edit Product' : 'Add Product', content);
+        };
+        
+        // --- Customer CRUD ---
+        const openCustomerModal = (customer = null) => {
+            const isEdit = customer !== null;
+            const content = document.createElement('div');
+            content.className = 'space-y-4';
+            content.innerHTML = `
+                <input id="customer-name" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Customer Name" value="${isEdit ? customer.name : ''}">
+                <input id="customer-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Phone" value="${isEdit ? customer.phone : ''}">
+                <input id="customer-address" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Address" value="${isEdit ? customer.address : ''}">
+                <button id="save-customer-form-btn" class="w-full px-4 py-2 rounded-md font-semibold text-sm bg-green-600 text-white hover:bg-green-700">${isEdit ? 'Update' : 'Save'}</button>
+            `;
+             content.querySelector('#save-customer-form-btn').onclick = async () => {
+                const customerData = {
+                    name: document.getElementById('customer-name').value,
+                    phone: document.getElementById('customer-phone').value,
+                    address: document.getElementById('customer-address').value,
+                };
+                if (isEdit) {
+                    await setDoc(doc(db, `artifacts/${appId}/public/data/customers`, customer.id), customerData, { merge: true });
+                } else {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/customers`), customerData);
+                }
+                closeModal();
+            };
+            openModal(isEdit ? 'Edit Customer' : 'Add Customer', content);
+        };
+
+        // --- New Bill Logic ---
+        const renderBillItems = () => {
+            const tbody = document.getElementById('bill-items-table-body');
+            tbody.innerHTML = currentBillItems.map(item => `
+                <tr class="border-b"><td class="p-3">${item.name}</td>
+                <td class="p-3"><input type="number" class="bill-item-qty w-20 text-center border rounded-md" value="${item.quantity}" data-id="${item.id}"></td>
+                <td class="p-3">${item.rate.toFixed(2)}</td><td class="p-3">${(item.rate * item.quantity).toFixed(2)}</td>
+                <td class="p-3"><button class="remove-bill-item-btn text-red-500" data-id="${item.id}"><i data-lucide="trash-2" class="h-5 w-5"></i></button></td></tr>
+            `).join('');
+            calculateTotals();
+            lucide.createIcons();
+        };
+
+        const calculateTotals = () => {
+            let subTotal = 0, totalGst = 0;
+            currentBillItems.forEach(item => {
+                const itemTotal = item.rate * item.quantity;
+                subTotal += itemTotal;
+                totalGst += itemTotal * (item.gst / 100);
+            });
+            const grandTotal = subTotal + totalGst;
+            document.getElementById('subtotal').textContent = `₹${subTotal.toFixed(2)}`;
+            document.getElementById('total-gst').textContent = `₹${totalGst.toFixed(2)}`;
+            document.getElementById('grand-total').textContent = `₹${grandTotal.toFixed(2)}`;
+        };
+
+        const resetNewBill = async () => {
+            currentBillItems = [];
+            selectedCustomer = null;
+            document.getElementById('customer-search').value = '';
+            document.getElementById('product-search').value = '';
+            document.getElementById('selected-customer-display').classList.add('hidden');
+            document.getElementById('customer-search-container').classList.remove('hidden');
+            document.getElementById('bill-date').valueAsDate = new Date();
+            renderBillItems();
+            
+            // Set new bill number
+            const q = query(collection(db, `artifacts/${appId}/public/data/bills`));
+            const querySnapshot = await getDocs(q);
+            let maxBillNo = 0;
+            querySnapshot.forEach(doc => {
+                const billNoInt = parseInt(doc.data().billNo, 10);
+                if (!isNaN(billNoInt) && billNoInt > maxBillNo) {
+                    maxBillNo = billNoInt;
+                }
+            });
+            document.getElementById('bill-no').value = (maxBillNo + 1).toString().padStart(4, '0');
+        };
+        
+        const generatePrintableInvoice = (bill) => {
+            const shopDetails = { name: "MUKUND AGRO SEEDS", address: "YOUR SHOP ADDRESS, CITY", gstin: "YOUR_GSTIN_HERE", phone: "YOUR_PHONE_NUMBER" };
+            return `
+            <div class="p-8 bg-white font-serif">
+                <header class="text-center mb-8 pb-4 border-b-2 border-gray-800">
+                    <h1 class="text-4xl font-bold text-gray-900">TAX INVOICE</h1>
+                    <h2 class="text-2xl font-semibold text-gray-700">${shopDetails.name}</h2>
+                    <p class="text-gray-600">${shopDetails.address} | GSTIN: ${shopDetails.gstin}</p>
+                    <p class="text-gray-600">Phone: ${shopDetails.phone}</p>
+                </header>
+                <section class="flex justify-between mb-8">
+                    <div><h3 class="font-bold text-gray-800">Bill To:</h3><p>${bill.customer.name}</p>${bill.customer.address ? `<p>${bill.customer.address}</p>` : ''}<p>${bill.customer.phone}</p></div>
+                    <div class="text-right"><p><span class="font-bold">Invoice No:</span> ${bill.billNo}</p><p><span class="font-bold">Date:</span> ${new Date(bill.billDate).toLocaleDateString()}</p></div>
+                </section>
+                <table class="w-full text-left border-collapse mb-8">
+                     <thead class="bg-gray-800 text-white"><tr><th class="p-2 border border-gray-400">#</th><th class="p-2 border border-gray-400">Item</th><th class="p-2 border border-gray-400">HSN</th><th class="p-2 border border-gray-400">Qty</th><th class="p-2 border border-gray-400">Rate</th><th class="p-2 border border-gray-400">GST%</th><th class="p-2 border border-gray-400">Amount</th></tr></thead>
+                     <tbody>${bill.items.map((item, i) => `<tr><td class="p-2 border border-gray-400">${i + 1}</td><td class="p-2 border border-gray-400">${item.name}</td><td class="p-2 border border-gray-400">${item.hsn}</td><td class="p-2 border border-gray-400">${item.quantity} ${item.unit}</td><td class="p-2 border border-gray-400">${item.rate.toFixed(2)}</td><td class="p-2 border border-gray-400">${item.gst}%</td><td class="p-2 border border-gray-400 text-right">${(item.rate * item.quantity).toFixed(2)}</td></tr>`).join('')}</tbody>
+                </table>
+                <section class="flex justify-end mb-8">
+                    <div class="w-2/5"><div class="flex justify-between p-1"><span class="font-bold">Subtotal:</span><span>₹${bill.subTotal.toFixed(2)}</span></div><div class="flex justify-between p-1"><span class="font-bold">Total GST:</span><span>₹${bill.totalGst.toFixed(2)}</span></div><div class="flex justify-between p-2 mt-2 bg-gray-200 font-bold text-lg"><span>Grand Total:</span><span>₹${bill.grandTotal.toFixed(2)}</span></div></div>
+                </section>
+                <footer class="text-center pt-4 border-t-2 border-gray-800"><p class="font-bold">Thank you!</p></footer>
+            </div>`;
+        };
+        
+        // --- Event Listeners Setup ---
+        const setupEventListeners = () => {
+            // Navigation
+            navMenu.addEventListener('click', e => {
+                const target = e.target.closest('.nav-button, li[data-view]');
+                if (target) {
+                    const viewId = target.dataset.view || target.parentElement.dataset.view;
+                    if(viewId) showView(viewId);
+                }
+            });
+            document.querySelectorAll('.nav-button[data-view]').forEach(btn => btn.addEventListener('click', () => showView(btn.dataset.view)));
+
+            // Product buttons
+            document.getElementById('add-product-btn').addEventListener('click', () => openProductModal());
+            document.getElementById('products-table-body').addEventListener('click', e => {
+                const editBtn = e.target.closest('.edit-product-btn');
+                const deleteBtn = e.target.closest('.delete-product-btn');
+                if (editBtn) openProductModal(products.find(p => p.id === editBtn.dataset.id));
+                if (deleteBtn && confirm('Delete this product?')) deleteDoc(doc(db, `artifacts/${appId}/public/data/products`, deleteBtn.dataset.id));
+            });
+
+            // Customer buttons
+            document.getElementById('add-customer-btn').addEventListener('click', () => openCustomerModal());
+            document.getElementById('add-customer-quick-btn').addEventListener('click', () => openCustomerModal());
+            document.getElementById('customers-table-body').addEventListener('click', e => {
+                const editBtn = e.target.closest('.edit-customer-btn');
+                const deleteBtn = e.target.closest('.delete-customer-btn');
+                if (editBtn) openCustomerModal(customers.find(c => c.id === editBtn.dataset.id));
+                if (deleteBtn && confirm('Delete this customer?')) deleteDoc(doc(db, `artifacts/${appId}/public/data/customers`, deleteBtn.dataset.id));
+            });
+            
+            // New Bill - Customer Search
+            const customerSearch = document.getElementById('customer-search');
+            const customerResults = document.getElementById('customer-search-results');
+            customerSearch.addEventListener('input', () => {
+                const term = customerSearch.value.toLowerCase();
+                if (!term) { customerResults.innerHTML = ''; return; }
+                const filtered = customers.filter(c => c.name.toLowerCase().includes(term));
+                customerResults.innerHTML = filtered.map(c => `<li class="p-2 cursor-pointer hover:bg-gray-100" data-id="${c.id}">${c.name}</li>`).join('');
+            });
+            customerResults.addEventListener('click', e => {
+                const li = e.target.closest('li');
+                if (li) {
+                    selectedCustomer = customers.find(c => c.id === li.dataset.id);
+                    document.getElementById('selected-customer-display').innerHTML = `<span>${selectedCustomer.name}</span><button id="deselect-customer-btn" class="text-red-500"><i data-lucide="x"></i></button>`;
+                    document.getElementById('selected-customer-display').classList.remove('hidden');
+                    document.getElementById('customer-search-container').classList.add('hidden');
+                    customerSearch.value = '';
+                    customerResults.innerHTML = '';
+                    lucide.createIcons();
+                }
+            });
+            document.getElementById('selected-customer-display').addEventListener('click', e => {
+                 if (e.target.closest('#deselect-customer-btn')) {
+                    selectedCustomer = null;
+                    document.getElementById('selected-customer-display').classList.add('hidden');
+                    document.getElementById('customer-search-container').classList.remove('hidden');
+                 }
+            });
+
+            // New Bill - Product Search
+            const productSearch = document.getElementById('product-search');
+            const productResults = document.getElementById('product-search-results');
+            productSearch.addEventListener('input', () => {
+                 const term = productSearch.value.toLowerCase();
+                if (!term) { productResults.innerHTML = ''; return; }
+                const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+                productResults.innerHTML = filtered.map(p => `<li class="p-2 cursor-pointer hover:bg-gray-100" data-id="${p.id}">${p.name} - ₹${p.rate} (Stock: ${p.stock})</li>`).join('');
+            });
+            productResults.addEventListener('click', e => {
+                const li = e.target.closest('li');
+                if (li) {
+                    const product = products.find(p => p.id === li.dataset.id);
+                    const existing = currentBillItems.find(item => item.id === product.id);
+                    if (existing) existing.quantity++; else currentBillItems.push({ ...product, quantity: 1 });
+                    renderBillItems();
+                    productSearch.value = '';
+                    productResults.innerHTML = '';
+                }
+            });
+
+            // New Bill - Item management
+            document.getElementById('bill-items-table-body').addEventListener('input', e => {
+                if (e.target.classList.contains('bill-item-qty')) {
+                    const item = currentBillItems.find(i => i.id === e.target.dataset.id);
+                    const newQty = parseInt(e.target.value, 10);
+                    if (item && newQty >= 0) {
+                        item.quantity = newQty;
+                        renderBillItems();
+                    }
+                }
+            });
+            document.getElementById('bill-items-table-body').addEventListener('click', e => {
+                if (e.target.closest('.remove-bill-item-btn')) {
+                    const btn = e.target.closest('.remove-bill-item-btn');
+                    currentBillItems = currentBillItems.filter(i => i.id !== btn.dataset.id);
+                    renderBillItems();
+                }
+            });
+            
+            // New Bill - Save and Print
+            document.getElementById('save-bill-btn').addEventListener('click', async () => {
+                if (!selectedCustomer || currentBillItems.length === 0) return alert("Select customer and add products.");
+                
+                const totals = { subTotal: 0, totalGst: 0 };
+                currentBillItems.forEach(item => { const itemTotal = item.rate * item.quantity; totals.subTotal += itemTotal; totals.totalGst += itemTotal * (item.gst / 100); });
+                const grandTotal = totals.subTotal + totals.totalGst;
+                
+                const billData = {
+                    billNo: document.getElementById('bill-no').value, billDate: document.getElementById('bill-date').value,
+                    customer: { id: selectedCustomer.id, name: selectedCustomer.name, phone: selectedCustomer.phone, address: selectedCustomer.address },
+                    items: currentBillItems.map(i => ({ id: i.id, name: i.name, hsn: i.hsn, rate: i.rate, gst: i.gst, quantity: i.quantity, unit: i.unit })),
+                    subTotal: totals.subTotal, totalGst: totals.totalGst, grandTotal: grandTotal, createdAt: serverTimestamp(),
+                };
+                
+                const batch = writeBatch(db);
+                batch.set(doc(collection(db, `artifacts/${appId}/public/data/bills`)), billData);
+                currentBillItems.forEach(item => {
+                    const newStock = (item.stock || 0) - item.quantity;
+                    batch.update(doc(db, `artifacts/${appId}/public/data/products`, item.id), { stock: newStock });
+                });
+                
+                await batch.commit();
+                alert("Bill saved!");
+                showView('bills');
+            });
+            
+            document.getElementById('print-bill-btn').addEventListener('click', () => {
+                if (!selectedCustomer || currentBillItems.length === 0) return alert("Cannot print empty bill.");
+                const totals = { subTotal: 0, totalGst: 0 };
+                currentBillItems.forEach(item => { const itemTotal = item.rate * item.quantity; totals.subTotal += itemTotal; totals.totalGst += itemTotal * (item.gst / 100); });
+                
+                const billForPrint = {
+                    customer: selectedCustomer, items: currentBillItems,
+                    billNo: document.getElementById('bill-no').value, billDate: document.getElementById('bill-date').value,
+                    subTotal: totals.subTotal, totalGst: totals.totalGst, grandTotal: totals.subTotal + totals.totalGst
+                };
+                document.getElementById('print-area').innerHTML = generatePrintableInvoice(billForPrint);
+                window.print();
+            });
+            
+            // Bill History
+            document.getElementById('bill-history-list').addEventListener('click', e => {
+                 const li = e.target.closest('.bill-history-item');
+                 if (li) {
+                    const bill = bills.find(b => b.id === li.dataset.id);
+                    document.getElementById('bill-details-container').innerHTML = `<div>${generatePrintableInvoice(bill)} <button id="print-history-bill-btn" data-bill-id="${bill.id}" class="mt-4 w-full px-4 py-2 rounded-md font-semibold text-sm flex items-center justify-center gap-2 bg-gray-200 text-gray-800 hover:bg-gray-300"><i data-lucide="printer"></i> Print Bill</button></div>`;
+                    lucide.createIcons();
+                    
+                    document.querySelectorAll('.bill-history-item').forEach(item => item.classList.remove('bg-green-100'));
+                    li.classList.add('bg-green-100');
+                 }
+            });
+
+            document.getElementById('bill-details-container').addEventListener('click', e => {
+                const btn = e.target.closest('#print-history-bill-btn');
+                if (btn) {
+                    const bill = bills.find(b => b.id === btn.dataset.billId);
+                    document.getElementById('print-area').innerHTML = generatePrintableInvoice(bill);
+                    window.print();
+                }
+            });
+
+        };
+
+
+        // --- App Initialization ---
+        const initApp = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        console.log("User is signed in:", user.uid);
+                        setupFirestoreListeners();
+                        setupEventListeners();
+                        showView('dashboard');
+                        loadingSpinner.classList.add('hidden');
+                    } else {
+                        if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken);
+                        else await signInAnonymously(auth);
+                    }
+                });
+            } catch(e) {
+                console.error("Initialization error:", e);
+                loadingSpinner.innerHTML = "Error loading application.";
+            }
+        };
+
+        lucide.createIcons();
+        initApp();
+    </script>
+</body>
+</html>
+
